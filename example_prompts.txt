@@ -1,0 +1,65 @@
+Claude Code GitHub MCP Example: working with github from the command line.
+
+1. create a user story in github to create a hello world script in python.
+
+2. update user story. the hello world should display on a web based ui in python.                                                                                                                                                          │
+                                                                                                                                                       │
+3. update the user story  DOD and AC to include documentaiton in a README.md.
+
+
+Claude Code:
+
+Implement user story 1. I would like you to craft an implementation plan which i will review and approve. if i ask for changes, you will update the user story, then recreate a plan for approval. Upon approval, you will implement the user story and ensure you have complied with the AC and DOD. I would also like you to run a complete end to end integration test. Ensure the documetnation includes the steps i need to run the application, as i am a newbie.
+
+
+ChatGPT Input:
+""""
+Write a plain text prompt (no formatting) that I can use with Claude Code to create a simple ChatGPT-like application called RIVA ChatGPT. The application should be a minimal demonstration, with only the basic setup: configuration, streaming support, UI, Bedrock integration, and backend. No extra features are needed.
+
+The app will be a refactored version of the “Hello World” web application. It must include:
+
+A web-based UI built with Streamlit
+
+An API backend using FastAPI
+
+Integration with a Bedrock LLM for chat completions
+
+Streaming of LLM responses between UI and backend
+
+Use Python as the stack. The model should be anthropic.claude-sonnet-4-20250514-v1:0. Bedrock access keys are already set up in my AWS configuration and can be reused for simplicity.
+
+After building the application, generate a file named RIVACGPT.md with detailed run instructions.
+
+""""
+
+----------
+
+ChatGPT Output:
+
+""""
+create a user story(s) that detail the business and technical requirements in the below. at the end of your response walk through the user story dependencies, order of build, and what can be built in parallel.
+
+
+""""
+
+
+Claude Code:
+plan out the build, based on the order of operation you have defined. You will test each story, and once DOD and AC are completed mark the state of the story as DONE. Pause after each user story completion for me to review the test results and any outputs.
+
+-----
+-----
+
+
+
+Code Statistics for Session
+""""
+Please analyze this codebase and give me a summary of its structure.
+Specifically, provide:
+- Total lines of code per language
+- Number of files per language
+- Number of classes and functions defined
+- Number of test files
+- Any large or complex files that stand out
+
+Present the results in a clear table.
+""""
