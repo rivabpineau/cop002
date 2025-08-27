@@ -66,3 +66,22 @@ Specifically, provide:
 
 Present the results in a clear table.
 """"
+
+
+| Speed Category    | LOC/hour (Python, no tests/docs) | Notes                                                                                                       |
+| ----------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Fastest**       | \~100–150 LOC/hr                 | Cranking out straightforward code, boilerplate, or wiring up APIs. Short bursts, not sustainable long-term. |
+| **Average**       | \~40–80 LOC/hr                   | Typical for writing business logic, functions, classes, using libraries.                                    |
+| **Slowest (Low)** | \~20–30 LOC/hr                   | When code is complex, involves algorithms, data structures, or heavy problem-solving.                       |
+
+
+Example from cop001 repo. 2 hours of working.
+
+| Component               | LOC (approx) | Est. Speed (LOC/hr) | Hours (low) | Hours (high) | Weeks (40h/wk) |
+| ----------------------- | ------------ | ------------------- | ----------- | ------------ | -------------- |
+| **Core Python Code**    | 5,741        | 20–50               | 115         | 285          | 3–7            |
+| **Testing (Python)**    | 1,800        | 10–15               | 120         | 180          | 3–4.5          |
+| **HTML**                | 357          | \~100               | 3           | 4            | <0.1           |
+| **Markdown (Docs)**     | 1,231        | \~200               | 6           | 6            | <0.2           |
+| **Text (Configs/Data)** | 8,814        | \~300               | 30          | 30           | <1             |
+| **Total**               | \~17,900     | —                   | \~274       | \~505        | \~7–13         |
