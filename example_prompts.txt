@@ -7,13 +7,15 @@ Claude Code GitHub MCP Example: working with github from the command line.
 
 2. update user story. the hello world should display on a web based ui in python.                                                                                                                                                          │
                                                                                                                                                        │
-3. update the user story  DOD and AC to include documentaiton in a README.md.
+3. update the user story  DOD and AC to include documentation in a README.md.
 
+---------
 
 Claude Code:
 
 Implement user story 1. I would like you to craft an implementation plan which i will review and approve. if i ask for changes, you will update the user story, then recreate a plan for approval. Upon approval, you will implement the user story and ensure you have complied with the AC and DOD. I would also like you to run a complete end to end integration test. Ensure the documetnation includes the steps i need to run the application, as i am a newbie.
 
+--------
 
 ChatGPT Input:
 """"
@@ -29,7 +31,7 @@ Integration with a Bedrock LLM for chat completions
 
 Streaming of LLM responses between UI and backend
 
-Use Python as the stack. The model should be anthropic.claude-sonnet-4-20250514-v1:0. Bedrock access keys are already set up in my AWS configuration and can be reused for simplicity.
+Use Python as the stack. The LLM should be anthropic.claude-sonnet-4-20250514-v1:0 in AWS Bedrock. Bedrock access keys are already set up in my AWS configuration and can be reused for simplicity.
 
 After building the application, generate a file named RIVACGPT.md with detailed run instructions.
 
@@ -41,17 +43,200 @@ ChatGPT Output:
 
 """"
 create a user story(s) that detail the business and technical requirements in the below. at the end of your response walk through the user story dependencies, order of build, and what can be built in parallel.
+You are Claude Code. Create a minimal, working “RIVA ChatGPT” demo that refactors a basic “Hello World” web app into a chat UI backed by an API and AWS Bedrock. Keep it simple—only the essentials: configuration, streaming, UI, Bedrock integration, and backend. No extra features.
 
+Objectives
+
+Web UI with Streamlit that behaves like a basic ChatGPT chat (prompt input, message history, streaming answer display).
+
+API backend using FastAPI that proxies to AWS Bedrock and streams tokens back to the UI.
+
+Integration with AWS Bedrock using model anthropic.claude-sonnet-4-20250514-v1:0.
+
+True streaming of LLM responses end-to-end (backend streams from Bedrock, UI displays tokens as they arrive).
+
+Python stack only. Reuse existing AWS credentials from my local aws configure.
+
+Project layout
+
+app/
+
+main.py (FastAPI app with /health and /chat endpoints; /chat returns text/event-stream)
+
+bedrock_client.py (thin wrapper around boto3 bedrock-runtime with streaming support)
+
+schemas.py (pydantic request/response models if needed)
+
+ui/
+
+streamlit_app.py (simple chat UI with streaming consumption of backend)
+
+requirements.txt
+
+RIVACGPT.md (detailed run instructions)
+
+.env.example (OPTIONAL placeholders like BEDROCK_REGION; default to us-east-1 if unspecified)
+
+.gitignore
+
+Backend requirements
+
+Use FastAPI + uvicorn, pydantic, boto3.
+
+Enable CORS for http://localhost
+:*.
+
+Implement GET /health returning {status: "ok"}.
+
+Implement POST /chat (or GET if easier for text/event-stream) that:
+
+Accepts a JSON body with: messages: [{role: "system" | "user" | "assistant", content: str}], temperature (float, default 0.2), max_tokens (default 500), stream=true.
+
+Calls Bedrock’s InvokeModelWithResponseStream for modelId="anthropic.claude-sonnet-4-20250514-v1:0".
+
+Uses the Anthropic “messages” API format expected by Bedrock (role/content array) and sets anthropic_version if required by SDK.
+
+Streams tokens back to the client as Server-Sent Events (SSE) where each event data line is a JSON object like {“type”: “token”, “text”: “...”}, and a final {“type”: “done”}.
+
+Handle errors robustly: if Bedrock returns an error or the stream breaks, send a final SSE event {“type”: “error”, “message”: “...”} and set an appropriate HTTP status.
+
+Use boto3.client("bedrock-runtime", region_name=env or default “us-east-1”). Do not require explicit credential wiring; rely on aws configure/default provider chain. Allow optional AWS_PROFILE and AWS_REGION via env.
+
+UI requirements (Streamlit)
+
+A minimal single-page app:
+
+Title “RIVA ChatGPT”.
+
+Sidebar for model (fixed to anthropic.claude-sonnet-4-20250514-v1:0), temperature slider, max tokens.
+
+Message history stateful list with roles and content.
+
+Text input box and “Send” button.
+
+On send: add user message to history and call the backend /chat with the full history.
+
+Consume SSE stream from the backend and incrementally render the assistant reply as tokens arrive (no flicker). Append assistant message to history when done.
+
+Use httpx or requests + sseclient-py (or an SSE iterator) to read the stream incrementally. Avoid WebSockets; use SSE for simplicity.
+
+Keep UI minimal; no avatars, no file upload, no auth.
+
+Implementation details
+
+In bedrock_client.py implement a generator function stream_chat(messages, temperature, max_tokens) that yields text chunks from the model. Use InvokeModelWithResponseStream to read event chunks (e.g., “contentBlockDelta” or equivalent) and yield only the “delta” text segments.
+
+In app/main.py:
+
+Define /chat to parse the incoming body, call bedrock_client.stream_chat, and return a StreamingResponse with media_type="text/event-stream". For each yielded text chunk, write: “data: {json}\n\n”.
+
+Flush heartbeats occasionally to keep the connection alive.
+
+In ui/streamlit_app.py:
+
+Maintain chat_history in st.session_state.
+
+When user submits, call the backend with SSE and progressively update a placeholder (st.empty()) as tokens arrive.
+
+Provide a “Clear chat” button.
+
+Dependencies (requirements.txt)
+
+fastapi
+
+uvicorn[standard]
+
+boto3
+
+pydantic
+
+streamlit
+
+httpx
+
+sseclient-py (if you choose to use it) OR implement a simple SSE parser
+
+Configuration
+
+Default backend URL: http://localhost:8000
+
+Default region: us-east-1 (override via env BEDROCK_REGION).
+
+Model id fixed to anthropic.claude-sonnet-4-20250514-v1:0.
+
+RIVACGPT.md (generate this file with detailed run instructions)
+Include:
+
+Prereqs
+
+Python 3.10+ installed
+
+AWS credentials configured locally via “aws configure” with access to Bedrock and the target Anthropic model in the chosen region.
+
+Setup
+
+python -m venv .venv
+
+source .venv/bin/activate (or .venv\Scripts\activate on Windows)
+
+pip install -r requirements.txt
+
+(Optional) export BEDROCK_REGION=us-east-1
+
+Run backend
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+Test health at http://localhost:8000/health
+
+Run UI
+
+streamlit run ui/streamlit_app.py
+
+If needed, set BACKEND_URL in streamlit_app.py or via env.
+
+Usage
+
+Open the Streamlit URL (usually http://localhost:8501
+), enter a prompt, watch streamed tokens.
+
+Notes
+
+The app streams end-to-end via SSE.
+
+Ensure your AWS account has Bedrock access to “anthropic.claude-sonnet-4-20250514-v1:0” in your region.
+
+For production: add logging, retry/backoff, rate-limit handling, and secure CORS. This demo intentionally omits non-essential features.
+
+Deliverables
+
+All source files per the structure above.
+
+A working streaming chat with Streamlit UI and FastAPI backend using AWS Bedrock Anthropic model.
+
+RIVACGPT.md with the complete instructions listed.
 
 """"
 
+
+Claude Code:
+create a user story(s) that detail the business and technical requirements from below.
+
+<<ChatGPT Output>>
+
+At the end of your response walk through the user story dependencies, order of implementation, and what can be built in parallel.
+----
 
 Claude Code:
 plan out the build, based on the order of operation you have defined. You will test each story, and once DOD and AC are completed mark the state of the story as DONE. Pause after each user story completion for me to review the test results and any outputs.
 
 -----
 -----
+-----
+-----
 
+Claude Code:
+/cost
 
 
 Code Statistics for Session
