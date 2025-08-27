@@ -1,3 +1,6 @@
+export $(grep -v '^#' .env.claude | xargs)
+
+
 Claude Code GitHub MCP Example: working with github from the command line.
 
 1. create a user story in github to create a hello world script in python.
