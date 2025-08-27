@@ -1,3 +1,7 @@
+# RIVA ChatGPT Docs
+ [RIVA ChatGPT Docs](RIVACGPT.md)
+
+---
 # Hello World Web Application
 
 A simple Python web application that displays "Hello, World!" in your web browser using Flask.
